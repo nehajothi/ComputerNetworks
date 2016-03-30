@@ -29,6 +29,19 @@ Email: \{bengaska, nehaj, mahdi.s.m.k, mstrout\}@email.arizona.edu}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
+When studying small objects in the Kuiper belt, a common approach is to simulate the orbits
+of points that start near observed objects and then analyze the orbits of those points to determine
+characteristics about them.  One key piece of information is whether the object is in orbital resonance
+with Neptune.  Currently this information is discovered through analysis codes written
+in Perl.  The problem is that the analysis experiences significant load imbalance and interpretation
+overhead, both of which result in analyzing around 100 objects taking ?? minutes
+on a ???(probably HPC machine for this).  With the new LLSST telescope that will be able
+to survey approximately 10K objects within a year or two, the need to do this analysis
+more efficiently is critical.
+In this case study, the original implementation to analyze the simulation data was
+written in Perl.  We compare this implementation in terms of performance and accuracy
+to implementations in parallel perl, Python, Chapel, Go, OpenMP, ...
+We find ...
 \end{abstract}
 
 \IEEEpeerreviewmaketitle
