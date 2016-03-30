@@ -1,0 +1,70 @@
+\documentclass[conference]{IEEEtran}
+
+% for numbered citations
+\usepackage{cite}
+% for figures based on pdfs
+\usepackage[pdftex]{graphicx}
+ 
+
+\begin{document}
+\title{Analyzing Parallel Programming Models for Medical Imaging}
+
+
+% author names and affiliations
+% use a multiple column layout for up to three different
+% affiliations
+\author{\IEEEauthorblockN{Julio C\'ardenas}
+\IEEEauthorblockA{Cancer Center\\
+University of Arizona\\
+Tucson, Arizona\\
+Email: http://www.cardenaslab.org}
+\and
+\IEEEauthorblockN{Forest Danford, Eric Welch, Michelle Mills Strout}
+\IEEEauthorblockA{Computer Science\\
+University of Arizona\\
+Tucson, Arizona\\
+Email: \{fdanford, welche, mstrout\}@email.arizona.edu}}
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{abstract}
+Medical image analysis can help identify tumors and determine how well such
+tumors might respond to treatment.
+Scientists exploring new techniques for performing such analyses typically
+prototype their algorithms in Matlab only to find that the lack of performance
+significantly constrains how much of the captured images can be analyzed,
+the size of the images, and the precision of the analysis.
+In this paper, we present a framework in Matlab for comparing different implementations
+of a medical imaging technique both in terms of performance but
+also how much the technique is impacted by noise in the picture.
+We use this framework to compare implementations of a medical imaging
+technique implemented in Parallel Matlab, Julia, ...
+We find ...
+\end{abstract}
+
+\IEEEpeerreviewmaketitle
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+~\cite{Luszczek2009}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Acknowledgment}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliographystyle{IEEEtran}
+\bibliography{dce-mri.bib}
+
+\end{document}
+
+

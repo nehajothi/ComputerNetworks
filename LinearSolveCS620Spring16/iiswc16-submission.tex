@@ -1,0 +1,78 @@
+\documentclass[conference]{IEEEtran}
+
+% for numbered citations
+\usepackage{cite}
+% for figures based on pdfs
+\usepackage[pdftex]{graphicx}
+ 
+
+\begin{document}
+\title{Analyzing On Node Parallel Programming Models for Linear Solvers}
+
+
+% author names and affiliations
+% use a multiple column layout for up to three different
+% affiliations
+\author{\IEEEauthorblockN{Christoph Brehm}
+\IEEEauthorblockA{Department of Aerospace and Mechanical Engineering\\
+University of Arizona\\
+Tucson, Arizona\\
+Email: cbrehm@email.arizona.edu}
+\and
+\IEEEauthorblockN{Jacob Combs, Erman Gurses, Michelle Mills Strout}
+\IEEEauthorblockA{Computer Science\\
+University of Arizona\\
+Tucson, Arizona\\
+Email: \{jacobcombs, egurses, mstrout\}@email.arizona.edu}}
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{abstract}
+Computational fluid dynamics codes include solving a number of systems of linear equations.
+Such codes are typically written in Fortran have been parallelized for distributed memory parallelism
+using MPI.  However, MPI does not run directly on GPUs (FIXME: check this)
+and does not scale well on shared memory machines.
+In this paper we investigate the use of OpenMP, OpenCL, CUDA, and Chapel
+as possible approaches to providing shared memory parallelism for the solving of linear
+systems in these applications.
+\end{abstract}
+
+\IEEEpeerreviewmaketitle
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+
+Other researchers have investigated the performance of red-black successive over-relaxation 
+in the parallel programming languages D, Go, and Chapel~\cite{Mittal2014}.
+[FIXME: what did they conclude?]
+
+
+Intro to GPU computing~\cite{Nickolls2010}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Questions for Someone to Answer}
+
+\begin{itemize}
+\item A number of solvers exist Hypre, PetsC, etc.   Why rewrote a solver for use within a particular application?
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Acknowledgment}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliographystyle{IEEEtran}
+\bibliography{linear-solve.bib}
+
+\end{document}
+
+

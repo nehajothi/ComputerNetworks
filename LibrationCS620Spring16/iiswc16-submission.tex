@@ -1,0 +1,71 @@
+\documentclass[conference]{IEEEtran}
+
+% for numbered citations
+\usepackage{cite}
+% for figures based on pdfs
+\usepackage[pdftex]{graphicx}
+ 
+
+\begin{document}
+\title{Analyzing Parallel Programming Models for Analysis of Small Object Orbital Data}
+
+
+% author names and affiliations
+% use a multiple column layout for up to three different
+% affiliations
+\author{\IEEEauthorblockN{Kat Volk}
+\IEEEauthorblockA{Lunary and Planetary Laboratory\\
+University of Arizona\\
+Tucson, Arizona\\
+Email: http://katvolk.com}
+\and
+\IEEEauthorblockN{Benjamin James Gaska, Neha Jothi, Mahdi Soltan Mohammadi, \\and Michelle Mills Strout}
+\IEEEauthorblockA{Computer Science\\
+University of Arizona\\
+Tucson, Arizona\\
+Email: \{bengaska, nehaj, mahdi.s.m.k, mstrout\}@email.arizona.edu}}
+
+\maketitle
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{abstract}
+When studying small objects in the Kuiper belt, a common approach is to simulate the orbits
+of points that start near observed objects and then analyze the orbits of those points to determine
+characteristics about them.  One key piece of information is whether the object is in orbital resonance
+with Neptune.  Currently this information is discovered through analysis codes written
+in Perl.  The problem is that the analysis experiences significant load imbalance and interpretation
+overhead, both of which result in analyzing around 100 objects taking ?? minutes
+on a ???(probably HPC machine for this).  With the new LLSST telescope that will be able
+to survey approximately 10K objects within a year or two, the need to do this analysis
+more efficiently is critical.
+In this case study, the original implementation to analyze the simulation data was
+written in Perl.  We compare this implementation in terms of performance and accuracy
+to implementations in parallel perl, Python, Chapel, Go, OpenMP, ...
+We find ...
+\end{abstract}
+
+\IEEEpeerreviewmaketitle
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Introduction}
+
+~\cite{ChapelOverviewJan13}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Acknowledgment}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliographystyle{IEEEtran}
+\bibliography{libration.bib}
+
+\end{document}
+
+
