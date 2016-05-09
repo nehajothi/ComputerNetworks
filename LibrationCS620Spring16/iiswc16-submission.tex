@@ -46,11 +46,46 @@ We find ...
 
 \IEEEpeerreviewmaketitle
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Questions}
+
+\begin{itemize}
+\item Who else is writing analysis codes for discovering orbital resonance and libration and
+what programming language are they using?
+\item How much variance is there between objects that take require checking most of the
+ratios and those that require few checks?  What are some concrete numbers?
+\item What does it mean when we say that the classification has happened manually?
+\item Year that LSST should come online?
+\item Do we only need to do the analysis for each object once?
+\end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
 ~\cite{ChapelOverviewJan13}
+
+Astronomers and planetary scientists would like to know which real
+objects in the Kuiper belt are resonant with Neptune.
+[Why do we want to know this?]
+
+Ideally this classification would be done automatically by 
+extrapolating the orbits of observed objects and then analyzing
+the simulated orbits to determine if resonance with Neptune occurs
+and if so which resonance.  Currently this process is done manually
+[what does this mean exactly?] with approximately
+2000 objects in the last 10 years being classified in
+groups of 10 to 20~\cite{ClassificationCite}.
+When the Large Synoptic Survey Telescope (LSST) comes online in  year(?)
+the expectation is that ten thousand objects
+will be observed within a year or two.
+
+Analyses are being programmed in Perl and ...  The problem
+is that these analyses exhibit a significant amount of load imbalance
+and the peak analysis time for an individual object is 
+on the order of 45 minutes(?).
+[Math showing that this will not scale.]
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
