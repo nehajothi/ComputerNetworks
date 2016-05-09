@@ -34,14 +34,20 @@ of points that start near observed objects and then analyze the orbits of those 
 characteristics about them.  One key piece of information is whether the object is in orbital resonance
 with Neptune.  Currently this information is discovered through analysis codes written
 in Perl.  The problem is that the analysis experiences significant load imbalance and interpretation
-overhead, both of which result in analyzing around 100 objects taking ?? minutes
-on a ???(probably HPC machine for this).  With the new LLSST telescope that will be able
+overhead, both of which result in the analysis of the time consuming objects requiring
+about 15 minutes.  With the new LLSST telescope that will be able
 to survey approximately 10K objects within a year or two, the need to do this analysis
 more efficiently is critical.
-In this case study, the original implementation to analyze the simulation data was
-written in Perl.  We compare this implementation in terms of performance and accuracy
-to implementations in parallel perl, Python, Chapel, Go, OpenMP, ...
-We find ...
+At 5 minutes for the time consuming cases the necessary once a month analyses would
+ take over 3 months.
+In this paper, we improve the execution time of the analysis by more than an order of 
+magnitude.  We do this by porting the analysis to various programming languages:
+parallel perl, Python, Chapel, Go, OpenMP, MPI, and Cilk++.
+We compare these implementations in terms of performance, accuracy,
+and maintainability from the perspective of the scientists.  We also
+identify the key problems in this workload in terms of parallelization and
+experiment with some possible parallelizations that help with the 
+significant load imbalance.
 \end{abstract}
 
 \IEEEpeerreviewmaketitle
@@ -52,11 +58,26 @@ We find ...
 \begin{itemize}
 \item Who else is writing analysis codes for discovering orbital resonance and libration and
 what programming language are they using?
+People describe what analyses they are doing but not how they are coding it up and 
+software not typically shared. Publish results of such analyses.
+Typically Fortran is what is posted.
+Observational survey posting Fortran and Python code to github.
+Saw these objects, what are they doing?  Code for classifying might not be publically
+available due to support reasons.
+
 \item How much variance is there between objects that take require checking most of the
 ratios and those that require few checks?  What are some concrete numbers?
+Kat might be able to give us a distribution on this. (60\% ish)
+
+\item Can put into models about history of Neptune.
+
 \item What does it mean when we say that the classification has happened manually?
-\item Year that LSST should come online?
+Every single classification is still checked by an eye.  Could do a second check?
+
+\item Year that LSST should come online?  5 to 10 years from now.
+
 \item Do we only need to do the analysis for each object once?
+Everytime fit the orbit with new observations.  Whole sky once per month.
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -85,6 +106,17 @@ and the peak analysis time for an individual object is
 on the order of 45 minutes(?).
 [Math showing that this will not scale.]
 
+Argument for speed
+\begin{verbatim}
+10000*5: 50000   ! number of objects times number of minutes for a long one. #/60: 833.333333 #/24: 34.722222  ! number of days
+would really like to do this on 3 time scales, short, medium, and long term
+might want more precision with more stuff in time files
+\end{verbatim}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Methodology}
+
+~\cite{ChapelOverviewJan13}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
