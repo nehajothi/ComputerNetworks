@@ -34,23 +34,152 @@ of points that start near observed objects and then analyze the orbits of those 
 characteristics about them.  One key piece of information is whether the object is in orbital resonance
 with Neptune.  Currently this information is discovered through analysis codes written
 in Perl.  The problem is that the analysis experiences significant load imbalance and interpretation
-overhead, both of which result in analyzing around 100 objects taking ?? minutes
-on a ???(probably HPC machine for this).  With the new LLSST telescope that will be able
+overhead, both of which result in the analysis of the time consuming objects requiring
+about 15 minutes.  With the new LLSST telescope that will be able
 to survey approximately 10K objects within a year or two, the need to do this analysis
 more efficiently is critical.
-In this case study, the original implementation to analyze the simulation data was
-written in Perl.  We compare this implementation in terms of performance and accuracy
-to implementations in parallel perl, Python, Chapel, Go, OpenMP, ...
-We find ...
+At 5 minutes for the time consuming cases the necessary once a month analyses would
+ take over 3 months.
+In this paper, we improve the execution time of the analysis by more than an order of 
+magnitude.  We do this by porting the analysis to various programming languages:
+parallel perl, Python, Chapel, Go, OpenMP, MPI, and Cilk++.
+We compare these implementations in terms of performance, accuracy,
+and maintainability from the perspective of the scientists.  We also
+identify the key problems in this workload in terms of parallelization and
+experiment with some possible parallelizations that help with the 
+significant load imbalance.
 \end{abstract}
 
 \IEEEpeerreviewmaketitle
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\section{Questions}
+%
+%\begin{itemize}
+%\item Who else is writing analysis codes for discovering orbital resonance and libration and
+%what programming language are they using?
+%People describe what analyses they are doing but not how they are coding it up and 
+%software not typically shared. Publish results of such analyses.
+%Typically Fortran is what is posted.
+%Observational survey posting Fortran and Python code to github.
+%Saw these objects, what are they doing?  Code for classifying might not be publically
+%available due to support reasons.
+%
+%\item How much variance is there between objects that take require checking most of the
+%ratios and those that require few checks?  What are some concrete numbers?
+%Kat might be able to give us a distribution on this. (60\% ish)
+%
+%\item Can put into models about history of Neptune.
+%
+%\item What does it mean when we say that the classification has happened manually?
+%Every single classification is still checked by an eye.  Could do a second check?
+%
+%\item Year that LSST should come online?  5 to 10 years from now.
+%
+%\item Do we only need to do the analysis for each object once?
+%Everytime fit the orbit with new observations.  Whole sky once per month.
+%\end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
+Astronomers and planetary scientists would like to know which real
+objects in the Kuiper belt are resonant with Neptune.
+By characterizing such objects, the models of the history of Neptune
+can be fine tuned.  [Kat: Need a sentence with a citation
+about why we care about this.] 
+The process by which such objects are currently being characterized
+does not scale to the number of expected objects that the
+upcoming Large Synoptic Survey Telescope (LSST) will enable scientists to find.
+This paper describes the analysis workload, why the workload does not
+scale, and presents and evaluates alternative implementations.
+
+The classification process entails the following steps:
+(1) observations of an object in [space, Kat: can we be more specific?],
+(2) extrapolating the orbit of the observed object,
+(3) simulating the extrapolated orbit [Kat: are (2) and (3) the
+same thing?],
+and
+(4) analyzing the simulated orbit to determine if the object is
+in resonance with Neptune.
+If the object is in resonance with Neptune, then the analysis
+program also determines what that resonance ratio is
+and what libration angles occur during that resonance.
+[Kat: I think we need a 2 column figure.  On the left a picture of 
+an object and Neptune orbiting the sun with a caption describing
+the resonance ratio.  On the right, showing the graph that the 
+analysis generates and pointing out the libration angle.]
+
+The current performance bottleneck for this process is the
+last step where the simulated orbit is analyzed for resonance
+and libration parameters.
+To our knowledge, no open source code that performs this
+analysis has been made available.  Astronomers [Kat?] report
+the results of such analyses in papers, but have not made their
+codes available or even details about the analysis 
+methodology~\cite{AnalysisResultsCitations}.
+Therefore, we investigate the workload of a Perl script
+that astronomer (planetary scientist, which one?) 
+Dr. Kat Volk wrote to perform the analysis.
+
+% NOTE: grouping the small, medium, and long term orbit analyses into one number.
+The Perl code takes approximately 15 minutes on a [Kat: which machine?]
+to fully analyze an object that is close to being in resonance but has a high
+resonance ratio or eventually is categorized as non-resonant.
+It is not possible to determine up front whether a particle will pass
+the initial checks in seconds or require most of the 5 minutes
+thus causing one level of load imbalance in the workload.
+Typically 60\% [Kat: citation] of all observed particles require
+the full analysis time.
+
+With approximately
+2000 objects in the last 10 years being classified in
+groups of 10 to 20~\cite{ClassificationCite}, an analysis time
+of up to 15 minutes per particle has not been an issue.
+However, when the Large Synoptic Survey Telescope (LSST) comes 
+online in  [Kat: year?] the expectation is that ten thousand objects
+will be observed within a year or two.
+Each month the LSST will scan the full sky and will able to update
+the position of these objects.  With updated positions, the 
+whole process of extrapolating a more accurate orbit and then 
+analyzing the orbit for resonance and libration will be redone
+each month to provide more precise information.
+Unfortunately, with 60\% of the 10,000 objects requiring 15 minutes
+each month, the analysis time for one month is currently over two months,
+which clearly is a problem.
+%10000*.60*15: 90000%#/60: 1500%#/24: 62.5
+%Argument for speed
+%\begin{verbatim}
+%10000*5: 50000   ! number of objects times number of minutes for a long one. %#/60: 833.333333 %#/24: 34.722222  ! number of days
+%would really like to do this on 3 time scales, short, medium, and long term
+%might want more precision with more stuff in time files
+%\end{verbatim}
+
+In this paper, we evaluate the process of porting the Perl analysis script
+to Python, Chapel, Go, OpenMP, MPI, and Cilk++.
+The ports were done in the context of a graduate course studying
+parallel programming models.  We evaluate the ported programs
+from the perspective of the programming language learning curve,
+how realistic the language is for planetary scientists [Kat?],
+the ease of use of the parallel constructs, and the performance.
+We also show results comparing various parallelization strategies
+for the code.
+
+Although more room for improvement is possible and 
+identified, some of the parallel versions we develop result in
+an order of magnitude improvement.  The planetary scientists [Kat?]
+will be able to use a parallel Python version that can do the
+requisite analyses in just over 6 days, instead of 60 days.
+The BLAH version was the fastest and would be able to do all
+the analyses in XX days.
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Methodology}
+
 ~\cite{ChapelOverviewJan13}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Conclusion}
