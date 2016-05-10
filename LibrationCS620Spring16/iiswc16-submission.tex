@@ -96,9 +96,8 @@ scale, and presents and evaluates alternative implementations.
 
 The classification process entails the following steps:
 (1) observations of an object in [space, Kat: can we be more specific?],
-(2) extrapolating the orbit of the observed object,
-(3) simulating the extrapolated orbit [Kat: are (2) and (3) the
-same thing?],
+(2) fitting an orbit to the observed object's position and velocity,
+(3) simulating the orbit forward in time 
 and
 (4) analyzing the simulated orbit to determine if the object is
 in resonance with Neptune.
@@ -147,10 +146,14 @@ each month to provide more precise information.
 Unfortunately, with 60\% of the 10,000 objects requiring 15 minutes
 each month, the analysis time for one month is currently over two months,
 which clearly is a problem.
-%10000*.60*15: 90000%#/60: 1500%#/24: 62.5
+%10000*.60*15: 90000
+%#/60: 1500
+%#/24: 62.5
 %Argument for speed
 %\begin{verbatim}
-%10000*5: 50000   ! number of objects times number of minutes for a long one. %#/60: 833.333333 %#/24: 34.722222  ! number of days
+%10000*5: 50000   ! number of objects times number of minutes for a long one. 
+%#/60: 833.333333 
+%#/24: 34.722222  ! number of days
 %would really like to do this on 3 time scales, short, medium, and long term
 %might want more precision with more stuff in time files
 %\end{verbatim}
