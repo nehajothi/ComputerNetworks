@@ -14,10 +14,10 @@
 % use a multiple column layout for up to three different
 % affiliations
 \author{\IEEEauthorblockN{Kat Volk}
-\IEEEauthorblockA{Lunary and Planetary Laboratory\\
+\IEEEauthorblockA{Lunar and Planetary Laboratory\\
 University of Arizona\\
 Tucson, Arizona\\
-Email: http://katvolk.com}
+Email: kvolk@lpl.arizona.edu}
 \and
 \IEEEauthorblockN{Benjamin James Gaska, Neha Jothi, Mahdi Soltan Mohammadi, \\and Michelle Mills Strout}
 \IEEEauthorblockA{Computer Science\\
@@ -29,17 +29,17 @@ Email: \{bengaska, nehaj, mahdi.s.m.k, mstrout\}@email.arizona.edu}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
-When studying small objects in the Kuiper belt, a common approach is to simulate the orbits
-of points that start near observed objects and then analyze the orbits of those points to determine
-characteristics about them.  One key piece of information is whether the object is in orbital resonance
-with Neptune.  Currently this information is discovered through analysis codes written
+When new small objects are discovered in the Kuiper belt, a common first step is to simulate the orbits
+of the observed objects forward in time and then analyze the simulation results to distinguish between 
+various types of orbital evolution.  One key piece of information is whether the object is in an orbital resonance
+with Neptune.  Currently this information us determined using analysis codes written
 in Perl.  The problem is that the analysis experiences significant load imbalance and interpretation
-overhead, both of which result in the analysis of the time consuming objects requiring
-about 15 minutes.  With the new LLSST telescope that will be able
-to survey approximately 10K objects within a year or two, the need to do this analysis
-more efficiently is critical.
-At 5 minutes for the time consuming cases the necessary once a month analyses would
- take over 3 months.
+overhead, both of which result in the analysis of the most time consuming objects requiring
+about 15 minutes.  NASA's Large Synoptic Survey Telescope (LSST) will begin operations in the early to mid
+2020's and is expected to discover and track $\sim$40K Kuiper belt objects over a ten year survey (compared to 
+the $\sim1000$ currently known objects), so the need to do this analysis more efficiently is critical.
+At 15 minutes for the time consuming cases (which we expect to be X\% of the discovered objects), the necessary 
+once a month analyses would take over 3 months.
 In this paper, we improve the execution time of the analysis by more than an order of 
 magnitude.  We do this by porting the analysis to various programming languages:
 parallel perl, Python, Chapel, Go, OpenMP, MPI, and Cilk++.
@@ -83,66 +83,86 @@ significant load imbalance.
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
-Astronomers and planetary scientists would like to know which real
-objects in the Kuiper belt are resonant with Neptune.
-By characterizing such objects, the models of the history of Neptune
-can be fine tuned.  [Kat: Need a sentence with a citation
-about why we care about this.] 
+Astronomers and planetary scientists would like to know which observed
+objects in the Kuiper belt are in orbital resonance with Neptune. These
+resonant objects are of particular interest because their distribution can
+be used as an observational test for theoretical models of the 
+outer Solar System's dynamical history \cite{Malhotra1993,Morby2008,Volk2016}.
+%By characterizing such objects, the models of the history of Neptune
+%can be fine tuned. 
 The process by which such objects are currently being characterized
 does not scale to the number of expected objects that the
 upcoming Large Synoptic Survey Telescope (LSST) will enable scientists to find.
 This paper describes the analysis workload, why the workload does not
 scale, and presents and evaluates alternative implementations.
 
-The classification process entails the following steps:
-(1) observations of an object in [space, Kat: can we be more specific?],
-(2) fitting an orbit to the observed object's position and velocity,
-(3) simulating the orbit forward in time 
+The classification process, which is detailed by \cite{Gladman2008}, entails the 
+following basic steps:
+(1) the position of the object in the sky at a variety of epochs is determined from observations 
+(2) these positions are used to fit an orbit (a combination of position and velocity) for the observed object
+(3) simulating the orbit forward in time under the gravitational influences of the Solar System's planets,
 and
 (4) analyzing the simulated orbit to determine if the object is
 in resonance with Neptune.
 If the object is in resonance with Neptune, then the analysis
-program also determines what that resonance ratio is
-and what libration angles occur during that resonance.
-[Kat: I think we need a 2 column figure.  On the left a picture of 
-an object and Neptune orbiting the sun with a caption describing
-the resonance ratio.  On the right, showing the graph that the 
-analysis generates and pointing out the libration angle.]
+program also determines which specific resonance the object is in
+and the amplitude of libration for the associated resonance angle. 
+The resonance angle describes the relative positions of the KBO and
+Neptune when the KBO has its closest approach to the Sun; when an object's
+evolution is controlled by the resonance, the angle will librate around a central
+value, whereas objects not in resonance will have a resonance angle that freely
+circulates between 0 and $360^{\circ}$. The resonance is labeled p:q according to the
+period ratio between the object and Neptune; a 3:2 (p=3, q=2) resonance is one where 
+the Kuiper belt object's orbital period is 1.5 times Neptune's orbital period. Figure~\ref{f:res-example}
+shows the geometry us such a resonance.
+%[Kat: I think we need a 2 column figure.  On the left a picture of 
+%an object and Neptune orbiting the sun with a caption describing
+%the resonance ratio.  On the right, showing the graph that the 
+%analysis generates and pointing out the libration angle.]
+\begin{figure} %[htbp]
+   \centering
+   \includegraphics[width=6.2in]{multi-panel-res-figure.eps}
+	\caption{Left: An illustration of the geometry of a 3:2 orbital resonance with Neptune. The Kuiper belt object's (KBO) orbital period is 1.5 times Neptune's orbital period; this means that while the KBO completes half an orbit, Neptune completes 3/4 of an orbit. Right: The resonance angle for an object in the 3:2 resonance (top) and one that starts in the resonance, but does not stay in resonance (bottom). }
+   \label{f:res-example}
+\end{figure}
+
 
 The current performance bottleneck for this process is the
-last step where the simulated orbit is analyzed for resonance
-and libration parameters.
-To our knowledge, no open source code that performs this
-analysis has been made available.  Astronomers [Kat?] report
-the results of such analyses in papers, but have not made their
-codes available or even details about the analysis 
-methodology~\cite{AnalysisResultsCitations}.
+last step where the simulated orbit is analyzed for libration of any 
+relevant resonance angles. A large number of p:q resonances must be
+checked for each object, and objects that are near the correct period
+ratio for a large set of p,q values take a long time to analyze.
+To our knowledge, there is not a standard, open source code available to 
+performs this analysis.  Researchers generally report
+the results of such analyses in papers, but do not make their
+codes available or report specific details about the analysis 
+methodology [there's not really a citation to show this!].%~\cite{AnalysisResultsCitations}.
 Therefore, we investigate the workload of a Perl script
-that astronomer (planetary scientist, which one?) 
-Dr. Kat Volk wrote to perform the analysis.
+that planetary scientist Dr. Kat Volk wrote to perform the analysis.
 
 % NOTE: grouping the small, medium, and long term orbit analyses into one number.
-The Perl code takes approximately 15 minutes on a [Kat: which machine?]
-to fully analyze an object that is close to being in resonance but has a high
-resonance ratio or eventually is categorized as non-resonant.
+The Perl code takes approximately 15 minutes on a Mac Mini to fully analyze an 
+object that is close to many potential resonance ratios (some of these 
+are eventually categorized as non-resonant).
 It is not possible to determine up front whether a particle will pass
-the initial checks in seconds or require most of the 5 minutes
+the initial resonance checks in seconds or require most of the 5 minutes
 thus causing one level of load imbalance in the workload.
 Typically 60\% [Kat: citation] of all observed particles require
 the full analysis time.
 
 With approximately
-2000 objects in the last 10 years being classified in
-groups of 10 to 20~\cite{ClassificationCite}, an analysis time
+1000 objects in the last 20 years being classified as they are discovered in
+groups of $\sim10-50$~\cite{Volk2016}, an analysis time
 of up to 15 minutes per particle has not been an issue.
 However, when the Large Synoptic Survey Telescope (LSST) comes 
-online in  [Kat: year?] the expectation is that ten thousand objects
-will be observed within a year or two.
-Each month the LSST will scan the full sky and will able to update
-the position of these objects.  With updated positions, the 
-whole process of extrapolating a more accurate orbit and then 
-analyzing the orbit for resonance and libration will be redone
-each month to provide more precise information.
+online in the mid to late 2020's, the expectation is that forty thousand 
+Kuiper belt objects will be discovered within the first few years of the survey
+and will be continuously tracked over the survey's ten year lifespan.
+Each month the LSST will scan the full southern sky multiple times and will provide new
+measurements of the position of these objects.  Using the updated positions, the 
+whole process of fitting a more accurate orbit and then 
+analyzing the orbit for libration within a resonance will be redone
+each month to provide more precise information for Kuiper belt researchers.
 Unfortunately, with 60\% of the 10,000 objects requiring 15 minutes
 each month, the analysis time for one month is currently over two months,
 which clearly is a problem.
